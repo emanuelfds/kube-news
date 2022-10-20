@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgre
+  namespace: jornada-devops
+spec:
+  selector:
+    matchLabels:
+      app: postgre
+  template:
+    metadata:
+      labels:
+        app: postgre
+    spec:
+      containers:
+        - name: postgre
+          image: postgres:15.0
+          resources:
+            limits:
+              memory: 128Mi
+              cpu: "0.4"
+            requests:
+              memory: 64Mi
+              cpu: "0.2"
+          ports:
+          - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "Pg#123"
+            - name: POSTGRES_USER
+              value: "kubenews"
+            - name: POSTGRES_DB
+              value: "kubenews"  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgre
+  namespace: jornada-devops
+spec:
+  selector:
+    app:  postgre
+  type: ClusterIP
+  ports:
+  - name:  postgre
+    port:  5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: jornada-devops
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: postgre
+          image: emanuelfds/kube-news:v1
+          resources:
+            limits:
+              memory: 64Mi
+              cpu: "0.4"
+            requests:
+              memory: 32Mi
+              cpu: "0.2"
+          ports:
+          - containerPort: 8080
+          env:  # Variáveis no arquivo "models/post.js"
+            - name: DB_PASSWORD
+              value: "Pg#123"
+            - name: DB_USERNAME
+              value: "kubenews"
+            - name: DB_DATABASE
+              value: "kubenews" 
+            - name: DB_HOST
+              value: "postgre" 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: jornada-devops
+spec:
+  selector:
+    app:  web
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30001
