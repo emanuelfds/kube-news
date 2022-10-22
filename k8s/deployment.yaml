@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
         - name: postgre
-          image: emanuelfds/kube-news:v1
+          image: emanuelfds/kube-news:{{TAG}}
           resources:
             limits:
               memory: 64Mi
