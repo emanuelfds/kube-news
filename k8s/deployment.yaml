@@ -90,6 +90,7 @@ metadata:
 spec:
   selector:
     app:  web
-  type: LoadBalancer
   ports:
-  - port: 80
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
